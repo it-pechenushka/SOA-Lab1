@@ -1,0 +1,15 @@
+.commands {
+    flex-direction: column;
+    width: 250px;
+}
+
+.commands > div {
+    margin: 10px 5px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.filter {
+    display: flex;
+    flex-direction: column;
+}

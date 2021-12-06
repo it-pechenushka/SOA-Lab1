@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://code.jquery.com/jquery-3.6.0.js" integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk=" crossorigin="anonymous"></script>
+    <link rel="stylesheet" type="text/css" href="css/index.css">
+    <link rel="stylesheet" type="text/css" href="css/special.css">
+    <title>Special Task</title>
+</head>
+<body>
+<div class="content">
+    <div class="data">
+        <div class="input-data">
+            <div class="students-count-data validate">
+                <label for="_students_count">Students Count:</label>
+                <input type="text" id="_students_count" name="studentsCount" pattern="[1-9][0-9]*" required>
+            </div>
+            <div class="group-admin-data" hidden>
+                <span>Group Admin</span>
+                <div class="validate nested">
+                    <label for="_name_admin">Name:</label>
+                    <input type="text" id="_name_admin" name="adminName" pattern=".+" required>
+                </div>
+                <div class="validate nested">
+                    <label for="_weight">Weight:</label>
+                    <input type="text" id="_weight" name="weight" pattern="[1-9][0-9]*" required>
+                </div>
+                <div class="location-data nested">
+                    <span>Location</span>
+                    <div class="validate nested">
+                        <label for="_x_location">X:</label>
+                        <input type="text" id="_x_location" name="xLocation" pattern="-?[0-9]*" required>
+                    </div>
+                    <div class="validate nested">
+                        <label for="_y_location">Y:</label>
+                        <input type="text" id="_y_location" name="yLocation" pattern="-?\d+(?:\.\d+)?" required>
+                    </div>
+                    <div class="validate nested">
+                        <label for="_z_location">Z:</label>
+                        <input type="text" id="_z_location" name="zLocation" pattern="-?[0-9]+" required>
+                    </div>
+                </div>
+                <div class="country-data validate nested">
+                    <label for="_country">Nationality:</label>
+                    <select id="_country">
+                        <option value="" selected></option>
+                        <option value="RUSSIA">Russia</option>
+                        <option value="FRANCE">France</option>
+                        <option value="SOUTH_KOREA">South Korea</option>
+                    </select>
+                    <input type="hidden" id="_country_filed" name="nationality" value="">
+                </div>
+                <div class="color-data validate nested">
+                    <label for="_color">Hair Color:</label>
+                    <select id="_color">
+                        <option value="" selected></option>
+                        <option value="GREEN">Green</option>
+                        <option value="RED">Red</option>
+                        <option value="YELLOW">Yellow</option>
+                    </select>
+                    <input type="hidden" id="_color_filed" name="hairColor" value="">
+                </div>
+            </div>
+        </div>
+        <div class="error-info">
+
+        </div>
+    </div>
+    <div class="commands">
+        <div>
+            <label for="command1" title="Удалить все объекты, значение поля studentsCount которого эквивалентно заданному.">DELETE ALL EQUIVALENT</label>
+            <input type="radio" name="command" id="command1" value="delete" class="command" checked>
+        </div>
+        <div>
+            <label for="command2" title="Вернуть количество объектов, значение поля groupAdmin которых равно заданному.">GET COUNT OF EQUIVALENT</label>
+            <input type="radio" name="command" id="command2" value="count" class="command">
+        </div>
+        <div>
+            <label for="command3" title="Вернуть массив объектов, значение поля groupAdmin которых больше заданного.">GET ALL OF CONDITION</label>
+            <input type="radio" name="command" id="command3" value="select" class="command">
+        </div>
+    </div>
+    <div class="submit">
+        <input type="button" value="Submit" id="submit">
+        <img id="indicator" src="img/loading.gif" alt="Loading...">
+    </div>
+    <div class="result">
+        <div class="result-text" hidden>
+
+        </div>
+        <div class="result-table" hidden>
+            <table>
+                <thead>
+                <tr>
+                    <th>Id</th>
+                    <th>Name</th>
+                    <th>Coordinates</th>
+                    <th>Creation Date</th>
+                    <th>Students Count</th>
+                    <th>Expelled Students</th>
+                    <th>Should Be Expelled</th>
+                    <th>Form Of Education</th>
+                    <th>Group Admin</th>
+                </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+    <div class="task-link">
+        <a href="index.html">Go to base task</a>
+    </div>
+</div>
+<script>
+    let currentCommand = "delete";
+    const baseURL = "http://" + window.location.host + "/special/groups";
+
+    $('.command').on('click', function () {
+        currentCommand = $(this).val();
+        resetInputs();
+        clearResultData();
+
+        switch (currentCommand){
+            case "delete":
+                $('.input-data > .group-admin-data').hide();
+                $('.input-data > .students-count-data').show();
+                break;
+            case "select":
+            case "count":
+                $('.input-data > .group-admin-data').show();
+                $('.input-data > .students-count-data').hide();
+                break;
+        }
+    })
+
+    $('#submit').on('click', function () {
+        let method = undefined;
+        let data = "";
+
+        $('.commands input').each(function () {
+            if ($(this).is(':checked')){
+                switch ($(this).val()){
+                    case "delete":
+                        method = "delete"
+                        break;
+                    case "count":
+                    case "select":
+                        method = "get"
+                        break;
+                }
+            }
+        })
+
+        if (currentCommand === "delete") {
+            data = `/${$('#_students_count').val()}`;
+        } else {
+            const filterPredicate = currentCommand === "count" ? "EQUALS" : "GREATER";
+            let filterParams = [];
+            data += "?commandType=" + (currentCommand === "count" ? "COUNT" : "SELECT");
+
+            $('.group-admin-data input').each(function () {
+                const name = $(this).attr("name");
+                const value = $(this).val();
+
+                if (value !== "" && value)
+                    filterParams.push(JSON.stringify({filedName: name, value: value, filterType: filterPredicate}));
+
+            });
+
+            if (filterParams.length > 0)
+                data += "&filter=" + JSON.stringify("[" + filterParams.join(",") + "]").replaceAll('\\', "").slice(1, -1);
+        }
+
+        clearResultData();
+
+        $('#indicator').css('visibility', 'visible');
+        $.ajax({
+            url: data === "" ? baseURL : baseURL + encodeURI(data),
+            method: method,
+            contentType: 'text/xml;charset=utf-8',
+            success: function (data){
+                $('#indicator').css('visibility', 'hidden');
+                const result = $(data).find('responseText');
+
+                if(result.length > 0){
+                    $('.result-text').append(`<span>${result.text()}</span>`).show();
+                } else {
+                    const resp = $(data).find('Groups');
+                    const groups = resp.find('StudyGroup');
+
+                    groups.each(function (){
+                        const resultHtml = getResultTableRow($(this));
+                        $('.result-table > table > tbody').append(resultHtml);
+                    })
+
+                    $('.result-table').show();
+                }
+            },
+            error: function (error){
+                $('#indicator').css('visibility', 'hidden');
+                const xmlError = $($.parseXML(error.responseText));
+
+                $('.error-info').append(`<p>Input error information</p>`);
+                $(xmlError).find('error').each(function (){
+                    $('.error-info').append(`<span class="error">${$(this).text()}</span>`);
+                });
+            }
+        })
+    })
+
+    function getResultTableRow(result){
+        const groupAdmin = result.find('GroupAdmin');
+        let resultHtml = "";
+        resultHtml += "<tr>" +
+            `<td>${result.find('id').first().length === 0 ? "n/a" : result.find('id').first().text()}</td>` +
+            `<td>${result.find('name').first().length === 0 ? "n/a" : result.find('name').first().text()}</td>` +
+            '<td><div class="big-info">'+
+            `<span>X: ${result.find('xCoordinate').length === 0 ? "n/a" : result.find('xCoordinate').text()}</span>` +
+            `<span>Y: ${result.find('yCoordinate').length === 0 ? "n/a" : result.find('yCoordinate').text()}</span>` +
+            "</div></td>" +
+            `<td>${result.find('creationDate').length === 0 ? "n/a" : result.find('creationDate').text()}</td>` +
+            `<td>${result.find('studentsCount').length === 0 ? "n/a" : result.find('studentsCount').text()}</td>` +
+            `<td>${result.find('expelledStudents').length === 0 ? "n/a" : result.find('expelledStudents').text()}</td>` +
+            `<td>${result.find('shouldBeExpelled').length === 0 ? "n/a" : result.find('shouldBeExpelled').text()}</td>` +
+            `<td>${result.find('formOfEducation').length === 0 ? "n/a" : result.find('formOfEducation').text().replaceAll("_", " ")}</td>`;
+
+        if (groupAdmin.length > 0) {
+            resultHtml += '<td><div class="big-info">' +
+                `<span>Name: ${groupAdmin.find('name').length === 0 ? "n/a" : groupAdmin.find('name').text()}</span>` +
+                `<span>Nationality: ${groupAdmin.find('nationality').length === 0 ? "n/a" : groupAdmin.find('nationality').text()}</span>` +
+                `<span>Hair Color: ${groupAdmin.find('hairColor').length === 0 ? "n/a" : groupAdmin.find('hairColor').text()}</span>` +
+                `<span>Weight: ${groupAdmin.find('weight').length === 0 ? "n/a" : groupAdmin.find('weight').text()}</span>`;
+
+            const location = groupAdmin.find("location");
+
+            if (location.length > 0){
+                resultHtml += `<span>Location: {X: ${groupAdmin.find('xLocation').length === 0 ? "n/a" : groupAdmin.find('xLocation').text()},
+                                            Y: ${groupAdmin.find('yLocation').length === 0 ? "n/a" : groupAdmin.find('yLocation').text()},
+                                            Z: ${groupAdmin.find('zLocation').length === 0 ? "n/a" : groupAdmin.find('zLocation').text()}}</span>`;
+            } else {
+                resultHtml += "<span>Location: n/a</span>";
+            }
+
+            resultHtml += "</div></td>";
+        } else {
+            resultHtml += "<td>n/a</td>";
+        }
+
+        resultHtml += "</tr>";
+
+        return resultHtml;
+    }
+
+    $('.input-data select').on('change', function () {
+        const value = $(this).val();
+
+        switch ($(this).attr("id")){
+            case "_country":
+                $('#_country_filed').val(value);
+                break;
+            case "_form_of_education":
+                $('#_form_of_education_filed').val(value);
+                break;
+            case "_color":
+                $('#_color_filed').val(value);
+                console.log($('#_color_filed').val());
+                break;
+        }
+    })
+
+    function clearResultData(){
+        $('.error-info').empty();
+        $('.result-table > table > tbody').empty();
+        $('.result-table').hide();
+        $('.result-text').empty().hide();
+    }
+
+    function resetInputs(){
+        $('.input-data input[type=text]').val('');
+    }
+</script>
+</body>
+</html>

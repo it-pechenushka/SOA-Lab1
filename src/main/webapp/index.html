@@ -1,0 +1,540 @@
+<html>
+<head>
+    <title>Lab1 SOA</title>
+    <meta charset="utf-8">
+    <script src="https://code.jquery.com/jquery-3.6.0.js" integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk=" crossorigin="anonymous"></script>
+    <link rel="stylesheet" type="text/css" href="css/index.css">
+</head>
+<body>
+    <div class="content">
+        <div class="data">
+            <div class="input-data">
+                <span>Study Group</span>
+                <div class="id-data validate" hidden>
+                    <label for="_id">Id:</label>
+                    <input type="text" id="_id" name="id" pattern="[0-9]*">
+                </div>
+                <div class="name-data validate flex">
+                    <label for="_name">Name:</label>
+                    <input type="text" id="_name" name="name" pattern="^[a-zA-Z_][a-zA-Z_0-9]*" required>
+                    <div class="sorting" hidden>
+                        <input type="checkbox" class="sortable" name="name" value="UP">↑
+                        <input type="checkbox" class="sortable" name="name" value="DOWN">↓
+                    </div>
+                </div>
+                <div class="coordinates-data validate">
+                    <span>Coordinates</span>
+                    <div class="validate nested flex">
+                        <label for="_x_coordinate">X:</label>
+                        <input type="text" id="_x_coordinate" name="xCoordinate" pattern="-?\d+(?:\.\d+)?" required>
+                        <div class="sorting" hidden>
+                            <input type="checkbox" class="sortable" name="xCoordinate" value="UP">↑
+                            <input type="checkbox" class="sortable" name="xCoordinate" value="DOWN">↓
+                        </div>
+                    </div>
+                    <div class="validate nested flex">
+                        <label for="_y_coordinate">Y:</label>
+                        <input type="text" id="_y_coordinate" name="yCoordinate" pattern="-?\d+(?:\.\d+)?" required>
+                        <div class="sorting" hidden>
+                            <input type="checkbox" class="sortable" name="yCoordinate" value="UP">↑
+                            <input type="checkbox" class="sortable" name="yCoordinate" value="DOWN">↓
+                        </div>
+                    </div>
+                </div>
+                <div class="students-count-data validate flex">
+                    <label for="_students_count">Students Count:</label>
+                    <input type="text" id="_students_count" name="studentsCount" pattern="[1-9][0-9]*" required>
+                    <div class="sorting" hidden>
+                        <input type="checkbox" class="sortable" name="studentsCount" value="UP">↑
+                        <input type="checkbox" class="sortable" name="studentsCount" value="DOWN">↓
+                    </div>
+                </div>
+                <div class="expelled-students-data validate flex">
+                    <label for="_expelled_students">Expelled Students:</label>
+                    <input type="text" id="_expelled_students" name="expelledStudents" pattern="[1-9][0-9]*" required>
+                    <div class="sorting" hidden>
+                        <input type="checkbox" class="sortable" name="expelledStudents" value="UP">↑
+                        <input type="checkbox" class="sortable" name="expelledStudents" value="DOWN">↓
+                    </div>
+                </div>
+                <div class="should-be-expelled-data validate flex">
+                    <label for="_should_be_expelled">Should Be Expelled:</label>
+                    <input type="text" id="_should_be_expelled" name="shouldBeExpelled" pattern="[1-9][0-9]*" required>
+                    <div class="sorting" hidden>
+                        <input type="checkbox" class="sortable" name="shouldBeExpelled" value="UP">↑
+                        <input type="checkbox" class="sortable" name="shouldBeExpelled" value="DOWN">↓
+                    </div>
+                </div>
+                <div class="form-of-education-data validate flex">
+                    <label for="_form_of_education">Form Of Education:</label>
+                    <select id="_form_of_education">
+                        <option value="" selected></option>
+                        <option value="DISTANCE_EDUCATION">Distance Education</option>
+                        <option value="FULL_TIME_EDUCATION">Full Time Education</option>
+                        <option value="EVENING_CLASSES">Evening Classes</option>
+                    </select>
+                    <input type="hidden" id="_form_of_education_filed" name="formOfEducation" value="">
+                    <div class="sorting" hidden>
+                        <input type="checkbox" class="sortable" name="formOfEducation" value="UP">↑
+                        <input type="checkbox" class="sortable" name="formOfEducation" value="DOWN">↓
+                    </div>
+                </div>
+                <div class="group-admin-data">
+                    <span>Group Admin</span>
+                    <input type="checkbox" id="hasAdmin" name="hasAdmin">
+                    <div class="sorting" hidden>
+                        <input type="checkbox" class="sortable" name="groupAdmin" value="UP">↑
+                        <input type="checkbox" class="sortable" name="groupAdmin" value="DOWN">↓
+                    </div>
+                    <div class="validate nested flex">
+                        <label for="_name_admin">Name:</label>
+                        <input type="text" id="_name_admin" name="name" pattern="^[a-zA-Z_][a-zA-Z_0-9]*" required>
+                    </div>
+                    <div class="validate nested">
+                        <label for="_weight">Weight:</label>
+                        <input type="text" id="_weight" name="weight" pattern="[1-9][0-9]*" required>
+                    </div>
+                    <div class="location-data nested">
+                        <span>Location</span>
+                        <div class="validate nested">
+                            <label for="_x_location">X:</label>
+                            <input type="text" id="_x_location" name="xLocation" pattern="-?[0-9]*" required>
+                        </div>
+                        <div class="validate nested">
+                            <label for="_y_location">Y:</label>
+                            <input type="text" id="_y_location" name="yLocation" pattern="-?\d+(?:\.\d+)?" required>
+                        </div>
+                        <div class="validate nested">
+                            <label for="_z_location">Z:</label>
+                            <input type="text" id="_z_location" name="zLocation" pattern="-?[0-9]+" required>
+                        </div>
+                    </div>
+                    <div class="country-data validate nested">
+                        <label for="_country">Nationality:</label>
+                        <select id="_country">
+                            <option value="" selected></option>
+                            <option value="RUSSIA">Russia</option>
+                            <option value="FRANCE">France</option>
+                            <option value="SOUTH_KOREA">South Korea</option>
+                        </select>
+                        <input type="hidden" id="_country_filed" name="nationality" value="">
+                    </div>
+                    <div class="color-data validate nested">
+                        <label for="_color">Hair Color:</label>
+                        <select id="_color">
+                            <option value="" selected></option>
+                            <option value="GREEN">Green</option>
+                            <option value="RED">Red</option>
+                            <option value="YELLOW">Yellow</option>
+                        </select>
+                        <input type="hidden" id="_color_filed" name="hairColor" value="">
+                    </div>
+                </div>
+                <div class="page-data" hidden>
+                    -----------------------------------------------------------
+                    <div class="nested">
+                        <label for="_page_size">Page size:</label>
+                        <input type="text" id="_page_size" name="pageSize" pattern="[0-9]*">
+                    </div>
+                    <div class="nested">
+                        <label for="_page_number">Page number:</label>
+                        <input type="text" id="_page_number" name="pageNumber" pattern="-?[0-9]+">
+                    </div>
+                </div>
+            </div>
+            <div class="error-info">
+
+            </div>
+        </div>
+        <div class="commands">
+            <div>
+                <label for="command-add">ADD</label>
+                <input type="radio" name="command" id="command-add" value="add" class="command" checked>
+            </div>
+
+            <div>
+                <label for="command-get">GET</label>
+                <input type="radio" name="command" id="command-get" value="get" class="command">
+            </div>
+
+            <div>
+                <label for="command-update">UPDATE</label>
+                <input type="radio" name="command" id="command-update" value="update" class="command">
+            </div>
+
+            <div>
+                <label for="command-delete">DELETE</label>
+                <input type="radio" name="command" id="command-delete" value="delete" class="command">
+            </div>
+
+            <div>
+                <label for="command-all">GET ALL</label>
+                <input type="radio" name="command" id="command-all" value="all" class="command">
+            </div>
+        </div>
+        <div class="submit">
+            <input type="button" value="Submit" id="submit">
+            <img id="indicator" src="img/loading.gif" alt="Loading...">
+        </div>
+        <div class="result">
+            <div class="result-text" hidden>
+
+            </div>
+            <div class="result-table" hidden>
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Name</th>
+                        <th>Coordinates</th>
+                        <th>Creation Date</th>
+                        <th>Students Count</th>
+                        <th>Expelled Students</th>
+                        <th>Should Be Expelled</th>
+                        <th>Form Of Education</th>
+                        <th>Group Admin</th>
+                    </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+        <div class="task-link">
+            <a href="special.html">Go to special task</a>
+        </div>
+    </div>
+    <script>
+        let currentCommand = "add";
+        const url = "http://" + window.location.host + "/base/groups";
+        $('.group-admin-data > div').hide();
+
+        $('#hasAdmin').on('click', function () {
+            if ($(this).is(':checked')) {
+                if (currentCommand !== "all")
+                    $('.group-admin-data > div:not(.sorting)').show();
+                else
+                    $('.group-admin-data > div').show();
+
+            } else
+                $('.group-admin-data > div').hide();
+        })
+
+        $('.command').on('click', function () {
+            clearResultData();
+            resetInputs();
+            currentCommand = $(this).val();
+            $('#_id').prop('required', true);
+            $('.sorting').hide();
+
+            switch (currentCommand){
+                case "get":
+                case "delete":
+                    $('.input-data > div:not(:first-of-type)').hide();
+                    $('.id-data').show();
+                    $('.page-data').hide();
+                    break;
+
+                case "update":
+                case "add":
+                case "all":
+                    $('.input-data > div:not(:first-of-type)').show();
+                    $('.page-data').hide();
+                    if (currentCommand === "add" || currentCommand === "all") {
+                        $('.id-data').hide();
+                        if (currentCommand === "add")
+                            $('input[type=text]').prop('required', true);
+                        else
+                            $('input[type=text]').prop('required', false);
+
+                        if (currentCommand == "all"){
+                            $('.sorting').show();
+                            $('.group-admin-data .sorting').hide();
+                            $('.page-data').show()
+                        }
+
+                        $('#_id').prop('required', false);
+                    } else {
+                        $('input[type=text]').prop('required', false);
+                        $('.id-data').show();
+                        $('#_id').prop('required', true);
+                    }
+                    break;
+            }
+        })
+
+        $('.sortable').on('click', function (){
+            const name = $(this).attr("name");
+
+           if ($(this).prop("checked")){
+               $(`input[name=${name}]`).prop("checked", false);
+               $(this).prop("checked", true);
+           }
+        });
+
+        $('.input-data select').on('change', function () {
+            const value = $(this).val();
+
+            switch ($(this).attr("id")){
+                case "_country":
+                    $('#_country_filed').val(value);
+                    break;
+                case "_form_of_education":
+                    $('#_form_of_education_filed').val(value);
+                    break;
+                case "_color":
+                    $('#_color_filed').val(value);
+                    break;
+            }
+        })
+
+        function handleGetAll(){
+            let data = [];
+            let hasAdmin = false;
+            let sortParams = [];
+            let filterParams = [];
+
+            $('.input-data input:not(.sortable)').each(function (){
+                const name = $(this).attr("name");
+                const value = $(this).val();
+
+                if (name === "hasAdmin"){
+                    hasAdmin = true;
+
+                } else if (value !== "" && value) {
+                    if (name === "pageSize" || name === "pageNumber")
+                        data.push(name + "=" + value);
+                    else
+                        if (name === "name" && hasAdmin)
+                            filterParams.push(JSON.stringify({filedName: "adminName", value: value, filterType: "EQUALS"}));
+                        else
+                            filterParams.push(JSON.stringify({filedName: name, value: value, filterType: "EQUALS"}));
+                }
+            });
+
+
+            if (filterParams.length > 0)
+                data.push("filter=" + JSON.stringify("[" + filterParams.join(",") + "]").replaceAll('\\', "").slice(1, -1));
+
+            $('.sorting input').each(function (){
+                const name = $(this).attr("name");
+                const value = $(this).val();
+                if ($(this).prop("checked"))
+                    sortParams.push(JSON.stringify({filedName: name, sortType: value}));
+            });
+
+            if (sortParams.length > 0)
+                data.push("sort=" + JSON.stringify("[" + sortParams.join(",") + "]").replaceAll('\\', "").slice(1, -1));
+
+
+            const resultData = data.join("&");
+
+            clearResultData();
+            $('#indicator').css('visibility', 'visible');
+
+            $.ajax({
+                url: resultData === "" ? url : url + "?" + encodeURI(resultData),
+                method: "get",
+                contentType: 'text/xml;charset=utf-8',
+                success: function (data){
+                    $('#indicator').css('visibility', 'hidden');
+                    $('.result-text').hide();
+                    const resp = $(data).find('Groups');
+                    const groups = resp.find('StudyGroup');
+
+                    groups.each(function (){
+                        const resultHtml = getResultTableRow($(this));
+                        $('.result-table > table > tbody').append(resultHtml);
+                    })
+
+                    $('.result-table').show();
+                },
+                error: function (error){
+                    $('#indicator').css('visibility', 'hidden');
+                    const xmlError = $($.parseXML(error.responseText));
+
+                    $('.error-info').append(`<p>Error information</p>`);
+                    $(xmlError).find('error').each(function (){
+                        $('.error-info').append(`<span class="error">${$(this).text()}</span>`);
+                    });
+                }
+            });
+        }
+
+        $('#submit').on('click', function () {
+            if (currentCommand == "all"){
+                handleGetAll();
+                return true;
+            }
+
+            const mainTag = "StudyGroup";
+            const groupAdminTag = "GroupAdmin";
+            let method = undefined;
+            let data;
+            let isDataInBody = true;
+
+            $('.commands input').each(function () {
+                if ($(this).is(':checked')){
+                    switch ($(this).val()){
+                        case "add":
+                            method = "post"
+                            break;
+                        case "get":
+                            method = "get"
+                            break;
+                        case "update":
+                            method = "put"
+                            break;
+                        case "delete":
+                            method = "delete"
+                            break;
+                    }
+                }
+            })
+
+            if (method === "post" || method === "put") {
+                const hasAdmin = $("#hasAdmin").is(":checked");
+                let hasLocation = false;
+
+                data = `<${mainTag}>\n`;
+                $('.input-data input:not(.sortable)').each(function () {
+                    const name = $(this).attr("name");
+                    const value = $(this).val();
+
+                    if (name === "hasAdmin") {
+                        if (hasAdmin)
+                            data += `<${groupAdminTag}>\n`
+                        else
+                            return false;
+                    } else
+                        if (value !== undefined && value !== '' && !name.includes("Location")){
+
+                        data += `<${name}>`;
+                        data += `${value}`;
+                        data += `</${name}>\n`;
+                    }
+                })
+
+                $(".location-data input:not(.sortable)").each(function (){
+                    const name = $(this).attr("name");
+                    const value = $(this).val();
+                    if (value !== undefined && value !== ''){
+                        if (!hasLocation){
+                            data += "<location>\n";
+                            hasLocation = true;
+                        }
+
+                        data += `<${name}>`;
+                        data += `${value}`;
+                        data += `</${name}>\n`;
+                    }
+                })
+
+                if (hasLocation)
+                    data += "</location>\n";
+
+                if (hasAdmin == true)
+                    data += `</${groupAdminTag}>\n`
+
+                data += `</${mainTag}>`;
+            } else {
+
+                data = `/${$('#_id').val()}`;
+                isDataInBody = false;
+            }
+
+            clearResultData();
+            $('#indicator').css('visibility', 'visible');
+
+            $.ajax({
+                url: isDataInBody ? url : url + data,
+                method: method,
+                contentType: 'text/xml;charset=utf-8',
+                data: isDataInBody ? data : undefined,
+                success: function (data){
+                    $('#indicator').css('visibility', 'hidden');
+                    handleData(data);
+                },
+                error: function (error){
+                    $('#indicator').css('visibility', 'hidden');
+                    const xmlError = $($.parseXML(error.responseText));
+
+                    $('.error-info').append(`<p>Error information</p>`);
+                    $(xmlError).find('error').each(function (){
+                        $('.error-info').append(`<span class="error">${$(this).text()}</span>`);
+                    });
+                }
+            });
+        })
+
+        function handleData(data) {
+            const result = $(data).find('responseText');
+
+            if(result.length > 0){
+                $('.result-text').append(`<span>${result.text()}</span>`).show();
+            } else {
+                const resultHtml = getResultTableRow($(data).find('StudyGroup'));
+                $('.result-table > table > tbody').append(resultHtml);
+
+                $('.result-table').show();
+            }
+        }
+
+        function getResultTableRow(result){
+            const groupAdmin = result.find('GroupAdmin');
+            let resultHtml = "";
+            resultHtml += "<tr>" +
+                `<td>${result.find('id').first().length === 0 ? "n/a" : result.find('id').first().text()}</td>` +
+                `<td>${result.find('name').first().length === 0 ? "n/a" : result.find('name').first().text()}</td>` +
+                '<td><div class="big-info">'+
+                `<span>X: ${result.find('xCoordinate').length === 0 ? "n/a" : result.find('xCoordinate').text()}</span>` +
+                `<span>Y: ${result.find('yCoordinate').length === 0 ? "n/a" : result.find('yCoordinate').text()}</span>` +
+                "</div></td>" +
+                `<td>${result.find('creationDate').length === 0 ? "n/a" : result.find('creationDate').text()}</td>` +
+                `<td>${result.find('studentsCount').length === 0 ? "n/a" : result.find('studentsCount').text()}</td>` +
+                `<td>${result.find('expelledStudents').length === 0 ? "n/a" : result.find('expelledStudents').text()}</td>` +
+                `<td>${result.find('shouldBeExpelled').length === 0 ? "n/a" : result.find('shouldBeExpelled').text()}</td>` +
+                `<td>${result.find('formOfEducation').length === 0 ? "n/a" : result.find('formOfEducation').text().replaceAll("_", " ")}</td>`;
+
+            if (groupAdmin.length > 0) {
+                resultHtml += '<td><div class="big-info">' +
+                    `<span>Name: ${groupAdmin.find('name').length === 0 ? "n/a" : groupAdmin.find('name').text()}</span>` +
+                    `<span>Nationality: ${groupAdmin.find('nationality').length === 0 ? "n/a" : groupAdmin.find('nationality').text()}</span>` +
+                    `<span>Hair Color: ${groupAdmin.find('hairColor').length === 0 ? "n/a" : groupAdmin.find('hairColor').text()}</span>` +
+                    `<span>Weight: ${groupAdmin.find('weight').length === 0 ? "n/a" : groupAdmin.find('weight').text()}</span>`;
+
+                const location = groupAdmin.find("location");
+
+                if (location.length > 0){
+                    resultHtml += `<span>Location: {X: ${groupAdmin.find('xLocation').length === 0 ? "n/a" : groupAdmin.find('xLocation').text()},
+                                                    Y: ${groupAdmin.find('yLocation').length === 0 ? "n/a" : groupAdmin.find('yLocation').text()},
+                                                    Z: ${groupAdmin.find('zLocation').length === 0 ? "n/a" : groupAdmin.find('zLocation').text()}}
+                                    </span>`;
+                } else {
+                    resultHtml += "<span>Location: n/a</span>";
+                }
+
+                resultHtml += "</div></td>";
+            } else {
+                resultHtml += "<td>n/a</td>";
+            }
+
+            resultHtml += "</tr>";
+
+            return resultHtml;
+        }
+
+        function clearResultData(){
+            $('.error-info').empty();
+            $('.result-table > table > tbody').empty();
+            $('.result-table').hide();
+            $('.result-text').empty().hide();
+        }
+
+        function resetInputs(){
+            $('.input-data input[type=text]').val('');
+            $('.group-admin-data > div').hide();
+            $('#hasAdmin').prop("checked", false);
+        }
+    </script>
+</body>
+</html>

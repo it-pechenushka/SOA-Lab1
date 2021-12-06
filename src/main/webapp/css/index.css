@@ -1,0 +1,170 @@
+body {
+    display: flex;
+    justify-content: center;
+    background: beige;
+}
+
+.content {
+    text-align: center;
+    width: 1400px;
+    height: auto;
+}
+
+.input-data {
+    text-align: left;
+}
+
+.input-data {
+    font-size: 20px;
+}
+
+.input-data > div {
+    margin-top: 10px;
+    margin-left: 50px;
+}
+
+.input-data input {
+    outline: none;
+}
+
+.nested {
+    margin-left: 50px;
+    margin-top: 5px;
+}
+
+.location-data > div, .coordinates-data > div {
+    width: 200px;
+    display: flex;
+}
+
+.location-data > div > input,
+.coordinates-data > div > input,
+.students-count-data > input,
+.expelled-students-data > input,
+.should-be-expelled-data > input {
+    margin-left: 5px;
+    width: 60px;
+}
+
+.students-count-data, .expelled-students-data, .should-be-expelled-data {
+    width: 250px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.data {
+    display: flex;
+}
+
+.input-data {
+    min-height: 200px;
+}
+
+.input-data, .error-info {
+    width: 50%;
+}
+
+.error-info {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+    font-size: 20px;
+    font-weight: bold;
+    padding-top: 50px;
+}
+
+.error-info > p {
+    border-bottom: 1px solid black;
+}
+
+.error {
+    margin-top: 15px;
+    color: red;
+    font-size: 16px;
+}
+
+.input-data > span {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.commands label {
+    cursor: pointer;
+}
+
+.input-data .validate > input:invalid {
+    border: red solid 3px;
+}
+
+.input-data .validate > input:valid {
+    border: green solid 3px;
+}
+
+.commands {
+    border: 1px solid black;
+    margin-top: 40px;
+    width: 500px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.result {
+    margin-top: 20px;
+}
+
+.result-text {
+    font-size: 20px;
+    font-weight: bold;
+    color: green;
+}
+
+.result-table > table {
+    text-align: right;
+    font-size: 16px;
+    width: 100%;
+}
+
+.result-table > table td, .result-table > table th {
+    border: 1px solid black;
+}
+
+.result-table > table > tbody td {
+    padding: 10px;
+}
+
+.result-table > table > thead {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.result-table > table .big-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.task-link {
+    text-align: left;
+    margin-top: 50px;
+    font-size: 18px;
+}
+
+.submit {
+    display: flex;
+    justify-content: center;
+}
+
+#indicator {
+    visibility: hidden;
+    margin-left: 10px;
+    width: 20px;
+    height: 20px;
+}
+
+.sorting {
+    width: 90px;
+}
+
+.flex {
+    display: flex;
+    align-items: center;
+}
