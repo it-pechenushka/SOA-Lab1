@@ -204,8 +204,8 @@
         </div>
     </div>
     <script>
+        const url = window.location.origin + "/Lab1/base/groups";
         let currentCommand = "add";
-        const url = "http://" + window.location.host + "/base/groups";
         $('.group-admin-data > div').hide();
 
         $('#hasAdmin').on('click', function () {
@@ -391,14 +391,18 @@
                 }
             })
 
+            let id = undefined;
             if (method === "post" || method === "put") {
                 const hasAdmin = $("#hasAdmin").is(":checked");
                 let hasLocation = false;
-
                 data = `<${mainTag}>\n`;
                 $('.input-data input:not(.sortable)').each(function () {
                     const name = $(this).attr("name");
                     const value = $(this).val();
+
+                    console.log(name);
+                    if (method === "put" && name === "id")
+                        id = value;
 
                     if (name === "hasAdmin") {
                         if (hasAdmin)
@@ -444,9 +448,8 @@
 
             clearResultData();
             $('#indicator').css('visibility', 'visible');
-
             $.ajax({
-                url: isDataInBody ? url : url + data,
+                url: isDataInBody ? (method === "put" ? url + `/${id}` : url) : url + data,
                 method: method,
                 contentType: 'text/xml;charset=utf-8',
                 data: isDataInBody ? data : undefined,

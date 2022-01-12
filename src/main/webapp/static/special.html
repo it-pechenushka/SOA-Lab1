@@ -82,7 +82,7 @@
     </div>
     <div class="submit">
         <input type="button" value="Submit" id="submit">
-        <img id="indicator" src="img/loading.gif" alt="Loading...">
+        <img id="indicator" src="../img/loading.gif" alt="Loading...">
     </div>
     <div class="result">
         <div class="result-text" hidden>
@@ -113,7 +113,7 @@
 </div>
 <script>
     let currentCommand = "delete";
-    const baseURL = "http://" + window.location.host + "/special/groups";
+    const baseURL = window.location.origin + "/Lab1/special/groups";
 
     $('.command').on('click', function () {
         currentCommand = $(this).val();

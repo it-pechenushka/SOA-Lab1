@@ -20,7 +20,6 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 public class Filter {
-    private HttpServletRequest request;
     private List<Order> orderList;
     private List<Predicate> predicateList;
     private CriteriaQuery<?> criteriaQuery;
@@ -31,8 +30,7 @@ public class Filter {
     private CriteriaBuilder criteriaBuilder;
     private FilterType filterType;
 
-    public Filter(HttpServletRequest request, CriteriaQuery<?> criteriaQuery, CriteriaBuilder criteriaBuilder, Root<StudyGroup> root){
-        this.request = request;
+    public Filter(CriteriaQuery<?> criteriaQuery, CriteriaBuilder criteriaBuilder, Root<StudyGroup> root){
         this.criteriaQuery = criteriaQuery;
         this.root = root;
         this.groupAdminPath = root.get("groupAdmin");
@@ -42,35 +40,18 @@ public class Filter {
         this.predicateList = new ArrayList<>();
     }
 
-    public CriteriaQuery<?> getResultCriteriaBuilder() throws InvalidParamsException {
-        Enumeration<String> parameterNames = request.getParameterNames();
+    public CriteriaQuery<?> getResultCriteriaBuilder(String filterParam, String sortParam) {
         Gson gsonParser = new Gson();
 
-        while (parameterNames.hasMoreElements()){
-            String name = parameterNames.nextElement();
-            String valueStr = request.getParameter(name);
+        SortDto[] sortDtos = gsonParser.fromJson(sortParam, SortDto[].class);
+        if (sortDtos != null)
+            for (SortDto sort: sortDtos)
+                handle(sort.getFiledName(), sort);
 
-            switch (name){
-                case "sort":
-                    SortDto[] sortDtos = gsonParser.fromJson(valueStr, SortDto[].class);
-                    for (SortDto sort: sortDtos) {
-                        handle(sort.getFiledName(), sort);
-                    }
-                    break;
-                case "filter":
-                    FilterDto[] filterDtos = gsonParser.fromJson(valueStr, FilterDto[].class);
-                    for (FilterDto filter: filterDtos) {
-                        handle(filter.getFiledName(), filter);
-                    }
-                    break;
-                case "pageSize":
-                case "pageNumber":
-                case "commandType":
-                    break;
-                default:
-                    throw new InvalidParamsException("Unexpected param name: " + name);
-            }
-        }
+        FilterDto[] filterDtos = gsonParser.fromJson(filterParam, FilterDto[].class);
+        if (filterDtos != null)
+            for (FilterDto filter: filterDtos)
+                handle(filter.getFiledName(), filter);
 
         return criteriaQuery.where(predicateList.toArray(new Predicate[]{})).orderBy(orderList);
     }

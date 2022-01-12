@@ -1,167 +1,169 @@
 package controller;
 
-import database.DatabaseContext;
+import dto.StudyGroupsDto;
 import exception.DataNotFoundException;
 import exception.FilterParamException;
 import exception.InvalidParamsException;
 import exception.ValidationException;
-import helper.CommonValidator;
-import helper.processing.Filter;
 import helper.ResponseBuilder;
-import dto.StudyGroupsDto;
 import helper.common.ErrorMessages;
+import helper.processing.Filter;
 import lombok.SneakyThrows;
 import model.*;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.PreDestroy;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.*;
-import javax.xml.bind.JAXB;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
-import java.io.*;
+import java.io.StringReader;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
-public class BaseOperationController extends HttpServlet {
-    private SessionFactory sessionFactory;
-    private Validator validator;
-    private Unmarshaller unmarshaller;
+@RestController
+@RequestMapping(value = "/base/groups", produces = "text/xml;charset=utf-8")
+public class BaseOperationController {
+    private final SessionFactory sessionFactory;
+    private final Validator validator;
+    private final Unmarshaller unmarshaller;
 
+    @Autowired
     @SneakyThrows
-    @Override
-    public void init() {
-        sessionFactory = DatabaseContext.getSessionFactory();
-        validator = Validation.buildDefaultValidatorFactory().getValidator();
-        unmarshaller = JAXBContext.newInstance(StudyGroup.class).createUnmarshaller();
-        unmarshaller.setEventHandler(event -> false);
-    }
-
-    @Override
-    protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        resp.setCharacterEncoding("utf-8");
-        resp.setContentType("text/xml");
-        super.service(req, resp);
+    public BaseOperationController(SessionFactory sessionFactory, Unmarshaller unmarshaller, Validator validator) {
+        this.sessionFactory = sessionFactory;
+        this.validator = validator;
+        this.unmarshaller = unmarshaller;
     }
 
     @SneakyThrows
-    @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) {
-        StringWriter responseContent = new StringWriter();
-
-        if (req.getPathInfo() == null) {
-            EntityManager em = sessionFactory.createEntityManager();
-            em.getTransaction().begin();
-
-            CriteriaBuilder cb = em.getCriteriaBuilder();
-            CriteriaQuery<StudyGroup> resultCriteria = cb.createQuery(StudyGroup.class);
-            Root<StudyGroup> root = resultCriteria.from(StudyGroup.class);
-            resultCriteria.select(root);
-
-            try {
-                if (req.getQueryString() != null) {
-                    Filter filter = new Filter(req, resultCriteria, cb, root);
-                    resultCriteria = (CriteriaQuery<StudyGroup>) filter.getResultCriteriaBuilder();
-                }
-
-                TypedQuery<StudyGroup> resultQuery = em.createQuery(resultCriteria);
-
-                if (req.getParameter("pageNumber") != null)
-                {
-                    int pageNumber = Integer.parseInt(req.getParameter("pageNumber"));
-                    if (pageNumber < 0) throw new InvalidParamsException("Invalid Page Number");
-                    resultQuery.setFirstResult(pageNumber);
-                }
-
-                if (req.getParameter("pageSize") != null)
-                {
-                    int pageSize = Integer.parseInt(req.getParameter("pageSize"));
-                    if (pageSize < 0) throw new InvalidParamsException("Invalid Page Size");
-
-                    resultQuery.setMaxResults(pageSize);
-                } else {
-                    resultQuery.setMaxResults(10);
-                }
-
-                List<StudyGroup> groups = resultQuery.getResultList();
-
-                StudyGroupsDto groupsDto = new StudyGroupsDto();
-
-                if (groups.size() == 0)
-                    throw new DataNotFoundException(ErrorMessages.EMPTY_ENTITY_LIST);
-
-                groupsDto.setGroups(groups);
-
-                JAXB.marshal(groupsDto, responseContent);
-                em.close();
-
-            } catch (NumberFormatException e){
-                throw new FilterParamException(ErrorMessages.WARNING_FLOAT, ErrorMessages.WARNING_INTEGER, ErrorMessages.WARNING_PAGINATION);
-            }
-        } else {
-
-            long id = CommonValidator.validateId(req.getPathInfo());
+    @GetMapping(value = "/{id}")
+    public ResponseEntity<StudyGroup> getSingleGroup(@PathVariable long id) {
+        if (id < 0)
+            throw new InvalidParamsException(ErrorMessages.INVALID_ID);
             Session session = sessionFactory.openSession();
             session.beginTransaction();
+
             StudyGroup studyGroup = session.get(StudyGroup.class, id);
 
-            if (studyGroup == null){
-                throw new DataNotFoundException(ErrorMessages.ENTITY_NOT_FOUND);
-            } else {
-                JAXB.marshal(studyGroup, responseContent);
-            }
-
             session.close();
-        }
 
-        resp.getWriter().println(responseContent);
+            if (studyGroup == null)
+                throw new DataNotFoundException(ErrorMessages.ENTITY_NOT_FOUND);
+
+            return new ResponseEntity<>(studyGroup, HttpStatus.OK);
 
     }
 
     @SneakyThrows
-    @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) {
-        Session session = sessionFactory.openSession();
+    @GetMapping
+    public ResponseEntity<StudyGroupsDto> getGroups(@RequestParam Map<String,String> params) {
+        for (String param: params.keySet()) {
+            switch (param){
+                case "sort":
+                case "filter":
+                case "pageSize":
+                case "pageNumber":
+                case "commandType":
+                    continue;
+                default:
+                    throw new InvalidParamsException("Unexpected param name: " + param);
+            }
+        }
 
-        StudyGroup studyGroup = deserializeStudyGroup(getRequestAsString(req));
+        StudyGroupsDto groupsDto = new StudyGroupsDto();
+        EntityManager em = sessionFactory.createEntityManager();
+        em.getTransaction().begin();
+        CriteriaBuilder cb = em.getCriteriaBuilder();
+        CriteriaQuery<StudyGroup> resultCriteria = cb.createQuery(StudyGroup.class);
+        Root<StudyGroup> root = resultCriteria.from(StudyGroup.class);
+        resultCriteria.select(root);
+
+        try {
+            String filterParam = params.get("filter");
+            String sortParam = params.get("sort");
+
+            if (filterParam != null || sortParam != null) {
+                Filter filter = new Filter(resultCriteria, cb, root);
+                resultCriteria = (CriteriaQuery<StudyGroup>) filter.getResultCriteriaBuilder(filterParam, sortParam);
+            }
+
+            TypedQuery<StudyGroup> resultQuery = em.createQuery(resultCriteria);
+
+            String pageNumberParam = params.get("pageNumber");
+            if (pageNumberParam != null)
+            {
+                int pageNumber = Integer.parseInt(pageNumberParam);
+                if (pageNumber < 0) throw new InvalidParamsException("Invalid Page Number");
+                resultQuery.setFirstResult(pageNumber);
+            }
+
+            String pageSizeParam = params.get("pageSize");
+            if (pageSizeParam != null)
+            {
+                int pageSize = Integer.parseInt(pageSizeParam);
+                if (pageSize < 0) throw new InvalidParamsException("Invalid Page Size");
+
+                resultQuery.setMaxResults(pageSize);
+            } else {
+                resultQuery.setMaxResults(10);
+            }
+
+            List<StudyGroup> groups = resultQuery.getResultList();
+
+            if (groups.size() == 0)
+                throw new DataNotFoundException(ErrorMessages.EMPTY_ENTITY_LIST);
+
+            groupsDto.setGroups(groups);
+
+            em.close();
+
+        } catch (NumberFormatException e){
+            throw new FilterParamException(ErrorMessages.WARNING_FLOAT, ErrorMessages.WARNING_INTEGER, ErrorMessages.WARNING_PAGINATION);
+        }
+
+        return new ResponseEntity<>(groupsDto, HttpStatus.OK);
+    }
+
+    @SneakyThrows
+    @PostMapping(produces = {MediaType.TEXT_XML_VALUE})
+    public ResponseEntity<String> createGroup(@RequestBody String body) {
+        StudyGroup studyGroup = deserializeStudyGroup(body);
         Set<ConstraintViolation<StudyGroup>> violations = validator.validate(studyGroup);
         if (violations.size() > 0)
             throw new ValidationException(violations);
 
+        Session session = sessionFactory.openSession();
         session.beginTransaction();
 
         session.save(studyGroup);
 
         session.getTransaction().commit();
 
-        resp.getWriter().println(ResponseBuilder.buildTextResponse("'Study Group' successfully created!"));
-
         session.close();
+
+        return new ResponseEntity<>(ResponseBuilder.buildTextResponse("'Study Group' successfully created!"), HttpStatus.OK);
     }
 
     @SneakyThrows
-    @Override
-    protected void doPut(HttpServletRequest req, HttpServletResponse resp) {
+    @PutMapping("/{id}")
+    public ResponseEntity<String> updateStudyGroup(@PathVariable long id, @RequestBody String body) {
+        StudyGroup studyGroupUpdate = deserializeStudyGroup(body);
+
         Session session = sessionFactory.openSession();
 
-        StudyGroup studyGroupUpdate = deserializeStudyGroup(getRequestAsString(req));
-
-        if (studyGroupUpdate.getId() == null)
-            throw new InvalidParamsException(ErrorMessages.INVALID_ID);
-
         session.beginTransaction();
-        StudyGroup studyGroup = session.get(StudyGroup.class, studyGroupUpdate.getId());
+        StudyGroup studyGroup = session.get(StudyGroup.class, id);
 
         if (studyGroup == null)
             throw new DataNotFoundException(ErrorMessages.ENTITY_NOT_FOUND);
@@ -173,22 +175,21 @@ public class BaseOperationController extends HttpServlet {
             throw new ValidationException(violations);
 
         session.merge(studyGroup);
+
         session.getTransaction().commit();
-
-        resp.getWriter().println(ResponseBuilder.buildTextResponse("'Study Group' successfully updated!"));
-
         session.close();
+
+        return new ResponseEntity<>(ResponseBuilder.buildTextResponse("'Study Group' successfully updated!"), HttpStatus.OK);
     }
 
     @SneakyThrows
-    @Override
-    protected void doDelete(HttpServletRequest req, HttpServletResponse resp) {
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteStudyGroup(@PathVariable long id) {
         Session session = sessionFactory.openSession();
 
-        long id = CommonValidator.validateId(req.getPathInfo());
         session.beginTransaction();
 
-        StudyGroup studyGroup = session.get(StudyGroup.class, id);;
+        StudyGroup studyGroup = session.get(StudyGroup.class, id);
 
         if (studyGroup == null)
             throw new DataNotFoundException(ErrorMessages.ENTITY_NOT_FOUND);
@@ -196,26 +197,20 @@ public class BaseOperationController extends HttpServlet {
         session.delete(studyGroup);
 
         session.getTransaction().commit();
-
-        resp.getWriter().println(ResponseBuilder.buildTextResponse("'Study Group' successfully deleted!"));
-
-        session.clear();
         session.close();
+
+        return new ResponseEntity<>(ResponseBuilder.buildTextResponse("'Study Group' successfully deleted!"), HttpStatus.OK);
     }
 
-    @Override
-    public void destroy() {
+    @PreDestroy
+    public void preDestroy() {
         sessionFactory.close();
-        super.destroy();
-        System.out.println("Controller has been destroyed");
+        System.out.println("Beans has been destroyed");
     }
 
-    private String getRequestAsString(HttpServletRequest request) throws IOException {
-        return request.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
-    }
-
-    private StudyGroup deserializeStudyGroup(String requestString) throws JAXBException {
-        return (StudyGroup) unmarshaller.unmarshal(new StringReader(requestString));
+    @SneakyThrows
+    private StudyGroup deserializeStudyGroup(String requestBody) {
+        return (StudyGroup) unmarshaller.unmarshal(new StringReader(requestBody));
     }
 
     private void toUpdate(StudyGroup old, StudyGroup update) {
